@@ -1,0 +1,9 @@
+[project]
+name = "video-editor"
+version = "0.1.0"
+description = "One video editing skill: engine (from browser-use/video-use) + Instagram and YouTube presets"
+requires-python = ">=3.10"
+dependencies = ["requests", "librosa", "matplotlib", "pillow", "numpy"]
+
+[tool.uv]
+package = false

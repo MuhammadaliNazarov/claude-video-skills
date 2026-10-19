@@ -1,0 +1,118 @@
+<!doctype html>
+<!--
+  SPLIT EXPLAINER template (from references/kallaway-split-explainer.md), 1080x1920, red / black / white.
+  Copy this file into <edit>/<project>/public/ with: speaker.mp4 (the cut talking head), fonts/, vendor/gsap.min.js,
+  img/, broll/, sfx/. Then edit only the SLOT sections and the TIMELINE block. Captions are NOT in here: burn them last
+  with ig-captions.py --style red-white --pos ref (one word at a time, 64% down, just above the speaker card).
+  Modes: card(t) = speaker docked in the bottom card; full(t) = speaker full screen (a pattern break every 10-15 s).
+  This copy is a working demo built on the 2026-10-13 intro footage.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<script src="vendor/gsap.min.js"></script>
+<style>
+  @font-face { font-family: "Inter"; src: url("fonts/Inter-Bold.ttf"); font-weight: 700; font-display: block; }
+  @font-face { font-family: "Inter"; src: url("fonts/Inter-Black.ttf"); font-weight: 900; font-display: block; }
+  @font-face { font-family: "Instrument Serif"; src: url("fonts/InstrumentSerif-Italic.ttf"); font-style: italic; font-display: block; }
+  :root { --bg: #0A0A0A; --red: #FF2A2A; --red-dim: #7A1414; --white: #FFFFFF; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 1080px; height: 1920px; overflow: hidden; background: var(--bg); }
+  #root { position: relative; width: 1080px; height: 1920px; overflow: hidden; background: var(--bg);
+          font-family: "Inter", ui-sans-serif, system-ui, sans-serif; color: var(--white); }
+  /* the stage: dot grid + vignette */
+  #grid { position: absolute; inset: 0; z-index: 0;
+          background-image: radial-gradient(rgba(255,255,255,.075) 1.6px, transparent 1.8px); background-size: 24px 24px; }
+  #vignette { position: absolute; inset: 0; z-index: 1;
+              background: radial-gradient(ellipse 70% 55% at 50% 38%, rgba(255,42,42,.07), transparent 60%),
+                          radial-gradient(ellipse at 50% 45%, transparent 45%, rgba(0,0,0,.75) 100%); }
+  /* speaker: one element, moved between card and full */
+  #spk { position: absolute; left: 68px; top: 1190px; width: 944px; height: 760px; border-radius: 37px; overflow: hidden;
+         z-index: 5; box-shadow: 0 -10px 60px rgba(0,0,0,.6); }
+  #spk video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 36%; }
+  /* title pair: heavy sans + serif italic with a red glowing underline */
+  .title { position: absolute; left: 0; width: 1080px; top: 150px; text-align: center; z-index: 10; }
+  .title .a { display: block; font-weight: 900; font-size: 54px; letter-spacing: -.035em; line-height: 1.05; opacity: 0; }
+  .title .b { display: inline-block; font-family: "Instrument Serif", serif; font-style: italic; font-size: 118px;
+              line-height: 1.02; letter-spacing: -.01em; opacity: 0; position: relative;
+              text-shadow: 0 0 28px rgba(255,255,255,.18); }
+  .title .u { position: absolute; left: 4%; right: 4%; bottom: 6px; height: 4px; border-radius: 2px; background: var(--red);
+              box-shadow: 0 0 14px var(--red), 0 0 34px rgba(255,42,42,.6); transform: scaleX(0); transform-origin: 0 50%; }
+  /* stage objects: glowing frames */
+  .frame { position: absolute; z-index: 8; overflow: hidden; opacity: 0; border-radius: 34px;
+           border: 3px solid rgba(255,255,255,.85);
+           box-shadow: 0 0 22px rgba(255,255,255,.35), 0 0 80px rgba(255,42,42,.35), 0 30px 80px rgba(0,0,0,.7); }
+  .frame.red { border-color: var(--red); box-shadow: 0 0 26px rgba(255,42,42,.8), 0 0 90px rgba(255,42,42,.45), 0 30px 80px rgba(0,0,0,.7); }
+  .frame img, .frame video { display: block; width: 100%; height: 100%; object-fit: cover; }
+  .chapter { position: absolute; z-index: 9; opacity: 0; display: flex; align-items: center; gap: 22px; }
+  .chapter .n { font-weight: 900; font-size: 250px; letter-spacing: -.06em; line-height: .8; color: var(--red);
+                text-shadow: 0 0 30px rgba(255,42,42,.7); }
+  .chapter .l { font-weight: 900; font-size: 64px; letter-spacing: -.04em; line-height: .95; }
+  .browser { background: #111; }
+  .browser .bar { height: 50px; background: #1c1c1e; display: flex; align-items: center; padding: 0 20px; gap: 9px; }
+  .browser .dot { width: 13px; height: 13px; border-radius: 50%; background: #3a3a3c; }
+  .browser .dot.r { background: var(--red); }
+  .browser .url { margin-left: 70px; padding: 6px 22px; border-radius: 16px; background: #2c2c2e; font-weight: 700; font-size: 20px; }
+  .browser img { height: auto; }
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="reel" data-start="0" data-duration="8.25" data-fps="24" data-width="1080" data-height="1920">
+  <div id="grid"></div><div id="vignette"></div>
+
+  <div id="spk"><video id="spk-video" src="speaker.mp4" playsinline data-has-audio="true"
+       data-start="0" data-duration="8.25" data-track-index="1"></video></div>
+
+  <!-- SLOT: titles (one per chapter) -->
+  <div id="t1" class="title clip" data-start="0" data-duration="1.96" data-track-index="10">
+    <span class="a">Hi, I'm</span><span class="b">Your Name<span class="u"></span></span></div>
+  <div id="t2" class="title clip" data-start="1.96" data-duration="2.29" data-track-index="11">
+    <span class="a">I come from</span><span class="b">Your Hometown<span class="u"></span></span></div>
+  <div id="t3" class="title clip" data-start="5.17" data-duration="3.08" data-track-index="12">
+    <span class="a">Now studying at</span><span class="b">Your University<span class="u"></span></span></div>
+
+  <!-- SLOT: stage objects -->
+  <video id="o-walk" class="frame clip" src="broll/walk.mp4" muted playsinline style="left:356px;top:410px;width:368px;height:654px;object-fit:cover"
+         data-start="0.1" data-duration="1.86" data-track-index="20"></video>
+  <div id="o-reg" class="frame red clip" style="left:150px;top:410px;width:780px;height:640px" data-start="1.96" data-duration="2.29" data-track-index="22">
+    <img src="img/registan.jpg" /></div>
+  <div id="o-web" class="frame browser clip" style="left:110px;top:430px;width:860px;height:534px" data-start="5.6" data-duration="1.4" data-track-index="23">
+    <div class="bar"><span class="dot r"></span><span class="dot"></span><span class="dot"></span><span class="url">yoursite.com</span></div>
+    <img src="img/site_home.png" /></div>
+  <div id="o-19" class="chapter clip" style="left:300px;top:560px" data-start="7.0" data-duration="1.25" data-track-index="24">
+    <span class="n" id="n19">0</span><span class="l">years<br>old</span></div>
+
+  <audio id="sfx-1" src="sfx/pop.mp3" data-start="5.78" data-duration="0.6" data-track-index="30" data-volume="0.3"></audio>
+</div>
+<script>
+  const tl = gsap.timeline({ paused: true });
+  // CARD: mid-shot footage (like the reference): top 1410, height 600, object-position 50% 28%, captions --pos ref.
+  //       close selfie footage: top 1190, height 760, object-position 50% 36%, captions --margin-v 790.
+  const CARD = { left: 68, top: 1190, width: 944, height: 760, borderRadius: 37 };
+  const FULL = { left: 0, top: 0, width: 1080, height: 1920, borderRadius: 0 };
+  const card = t => tl.set("#spk", CARD, t), full = t => tl.set("#spk", FULL, t);
+  const title = (id, t) => {        // line a rises, serif line rises, underline draws
+    tl.fromTo(id + " .a", { opacity: 0, y: 18 }, { opacity: 1, y: 0, duration: .35, ease: "power2.out" }, t);
+    tl.fromTo(id + " .b", { opacity: 0, y: 26 }, { opacity: 1, y: 0, duration: .4, ease: "power2.out" }, t + .22);
+    tl.fromTo(id + " .u", { scaleX: 0 }, { scaleX: 1, duration: .45, ease: "power2.inOut" }, t + .5);
+  };
+  const pop = (id, t, from = .9) => tl.fromTo(id, { opacity: 0, scale: from }, { opacity: 1, scale: 1, duration: .4, ease: "power2.out" }, t);
+
+  // TIMELINE (word times from the cut's transcript)
+  card(0);
+  title("#t1", 0.02); pop("#o-walk", 0.1);
+  title("#t2", 1.96); pop("#o-reg", 1.96, .94); tl.to("#o-reg img", { scale: 1.08, duration: 2.29, ease: "none" }, 1.96);
+  full(4.25);                                         // pattern break: "of the world"
+  card(5.17); title("#t3", 5.17);
+  tl.fromTo("#o-web", { opacity: 0, y: 70, rotationX: 12, transformPerspective: 1400 },
+            { opacity: 1, y: 0, rotationX: 0, duration: .45, ease: "power3.out" }, 5.6);
+  tl.set("#o-19", { opacity: 1 }, 7.0);
+  const c = { n: 0 };
+  tl.to(c, { n: 19, duration: .4, ease: "power2.out", onUpdate: () => { document.getElementById("n19").textContent = Math.round(c.n); } }, 7.0);
+
+  window.__timelines["reel"] = tl;
+  tl.seek(0);
+</script>
+</body>
+</html>

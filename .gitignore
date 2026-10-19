@@ -1,0 +1,31 @@
+# secrets
+.env
+!.env.example
+# python
+.venv/
+__pycache__/
+*.pyc
+uv.lock
+# generated / bring-your-own assets
+*.cube
+skills/video-editor/presets/instagram/assets/fonts/*
+!skills/video-editor/presets/instagram/assets/fonts/.gitkeep
+skills/video-editor/shared/sfx/**
+!skills/video-editor/shared/sfx/README.md
+skills/video-editor/shared/music/**
+!skills/video-editor/shared/music/README.md
+!skills/video-editor/shared/music/music-cut.py
+skills/video-editor/presets/youtube/**
+!skills/video-editor/presets/youtube/README.md
+# media + edit outputs
+edit/
+*.mp4
+*.mov
+*.MOV
+*.m4a
+*.mp3
+*.wav
+*.png
+*.jpg
+*.jpeg
+.DS_Store
